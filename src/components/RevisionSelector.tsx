@@ -24,7 +24,7 @@ export function RevisionSelector({ revisions, selectedId, onChange }: Props) {
       style={{ marginBottom: '8px' }}
     >
       <option value="">-- リビジョンを選択 --</option>
-      {revisions.map((rev) => (
+      {[...revisions].reverse().map((rev) => (
         <option key={rev.revisionId} value={rev.revisionId}>
           #{rev.revisionNo} - {rev.revisionId.slice(0, 8)} - {formatDate(rev.createdAt)}{' '}
           {rev.authorName}

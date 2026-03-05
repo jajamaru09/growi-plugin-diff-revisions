@@ -31,6 +31,17 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // Set default revision selection when revisions are loaded
+  useEffect(() => {
+    if (revisions.length >= 2) {
+      setLeftId(revisions[revisions.length - 2].revisionId);
+      setRightId(revisions[revisions.length - 1].revisionId);
+    } else if (revisions.length === 1) {
+      setLeftId('');
+      setRightId(revisions[0].revisionId);
+    }
+  }, [revisions]);
+
   // Compute diff when both revisions are selected
   useEffect(() => {
     const left = revisions.find((r) => r.revisionId === leftId);
