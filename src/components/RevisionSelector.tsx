@@ -36,7 +36,7 @@ export function RevisionSelector({
   canPrev,
   canNext,
 }: Props) {
-  const revisionUrl = selectedId ? `/${pageId}?revision=${selectedId}` : '';
+  const revisionUrl = selectedId ? `/${pageId}?revisionId=${selectedId}` : '';
 
   return (
     <div className="d-flex align-items-center gap-1" style={{ marginBottom: '8px' }}>
