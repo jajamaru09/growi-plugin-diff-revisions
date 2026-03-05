@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"f:/Work/growi-plugin-diff-revisions/docs\")",
+      "Bash(mkdir -p \"f:/Work/growi-plugin-diff-revisions/.steering\")",
+      "Bash(gh api repos/jajamaru09/growi-plugin-all-seen-users/contents --jq '.[].name')",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}
