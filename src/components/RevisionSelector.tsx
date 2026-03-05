@@ -3,6 +3,7 @@ import type { RevisionItem } from '../types.ts';
 interface Props {
   revisions: RevisionItem[];
   selectedId: string;
+  pageId: string;
   onChange: (revisionId: string) => void;
   onPrev: () => void;
   onNext: () => void;
@@ -28,12 +29,15 @@ const navBtnStyle: React.CSSProperties = {
 export function RevisionSelector({
   revisions,
   selectedId,
+  pageId,
   onChange,
   onPrev,
   onNext,
   canPrev,
   canNext,
 }: Props) {
+  const revisionUrl = selectedId ? `/${pageId}?revision=${selectedId}` : '';
+
   return (
     <div className="d-flex align-items-center gap-1" style={{ marginBottom: '8px' }}>
       <select
@@ -70,6 +74,22 @@ export function RevisionSelector({
       >
         ▶
       </button>
+      <a
+        href={revisionUrl || undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn btn-outline-secondary btn-sm"
+        style={{
+          ...navBtnStyle,
+          pointerEvents: revisionUrl ? 'auto' : 'none',
+          opacity: revisionUrl ? 1 : 0.5,
+          textDecoration: 'none',
+        }}
+        title="リビジョンを別タブで開く"
+        aria-disabled={!revisionUrl}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+      </a>
     </div>
   );
 }

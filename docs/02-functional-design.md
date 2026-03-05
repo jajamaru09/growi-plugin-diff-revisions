@@ -207,3 +207,4 @@ del, .diff-removed {
 |---|---|
 | [#01-dropdown-order-and-default-selection](.steering/20260306-01-dropdown-order-and-default-selection/) | ワイヤフレーム・RevisionSelectorに影響: ドロップダウン降順表示、デフォルトリビジョン選択を追加 |
 | [#02-revision-navigation-buttons](.steering/20260306-02-revision-navigation-buttons/) | ワイヤフレーム・コンポーネント設計に影響: RevisionSelectorに増減ボタン追加、DiffModalに中央同時増減ボタン追加 |
+| [#03-open-revision-link](.steering/20260306-03-open-revision-link/) | コンポーネント設計に影響: RevisionSelectorにリビジョン閲覧リンク追加、DiffModal・DiffButtonにpageId受け渡し追加 |

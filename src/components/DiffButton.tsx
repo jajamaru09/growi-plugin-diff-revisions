@@ -51,6 +51,7 @@ export function DiffButton({ pageId, cssClass }: Props) {
           revisions={revisions}
           loading={loading}
           error={error}
+          pageId={pageId}
           onClose={() => setIsOpen(false)}
         />
       )}

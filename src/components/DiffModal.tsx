@@ -10,10 +10,11 @@ interface Props {
   revisions: RevisionItem[];
   loading: boolean;
   error: string | null;
+  pageId: string;
   onClose: () => void;
 }
 
-export function DiffModal({ revisions, loading, error, onClose }: Props) {
+export function DiffModal({ revisions, loading, error, pageId, onClose }: Props) {
   const [leftId, setLeftId] = useState<string>('');
   const [rightId, setRightId] = useState<string>('');
   const [leftHtml, setLeftHtml] = useState<string>('');
@@ -167,6 +168,7 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
                 <RevisionSelector
                   revisions={revisions}
                   selectedId={leftId}
+                  pageId={pageId}
                   onChange={setLeftId}
                   onPrev={() => setLeftId((prev) => shiftRevision(prev, -1))}
                   onNext={() => setLeftId((prev) => shiftRevision(prev, 1))}
@@ -213,6 +215,7 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
                 <RevisionSelector
                   revisions={revisions}
                   selectedId={rightId}
+                  pageId={pageId}
                   onChange={setRightId}
                   onPrev={() => setRightId((prev) => shiftRevision(prev, -1))}
                   onNext={() => setRightId((prev) => shiftRevision(prev, 1))}
