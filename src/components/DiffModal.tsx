@@ -42,6 +42,40 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
     }
   }, [revisions]);
 
+  // Revision navigation helpers
+  const getIndex = useCallback(
+    (id: string) => revisions.findIndex((r) => r.revisionId === id),
+    [revisions],
+  );
+
+  const shiftRevision = useCallback(
+    (currentId: string, delta: number): string => {
+      const idx = getIndex(currentId);
+      if (idx < 0) return currentId;
+      const next = idx + delta;
+      if (next < 0 || next >= revisions.length) return currentId;
+      return revisions[next].revisionId;
+    },
+    [getIndex, revisions],
+  );
+
+  const leftIdx = getIndex(leftId);
+  const rightIdx = getIndex(rightId);
+  const canLeftPrev = leftIdx > 0;
+  const canLeftNext = leftIdx >= 0 && leftIdx < revisions.length - 1;
+  const canRightPrev = rightIdx > 0;
+  const canRightNext = rightIdx >= 0 && rightIdx < revisions.length - 1;
+  const canBothPrev = canLeftPrev && canRightPrev;
+  const canBothNext = canLeftNext && canRightNext;
+
+  const shiftBoth = useCallback(
+    (delta: number) => {
+      setLeftId((prev) => shiftRevision(prev, delta));
+      setRightId((prev) => shiftRevision(prev, delta));
+    },
+    [shiftRevision],
+  );
+
   // Compute diff when both revisions are selected
   useEffect(() => {
     const left = revisions.find((r) => r.revisionId === leftId);
@@ -134,8 +168,44 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
                   revisions={revisions}
                   selectedId={leftId}
                   onChange={setLeftId}
+                  onPrev={() => setLeftId((prev) => shiftRevision(prev, -1))}
+                  onNext={() => setLeftId((prev) => shiftRevision(prev, 1))}
+                  canPrev={canLeftPrev}
+                  canNext={canLeftNext}
                 />
                 <DiffPanel html={leftHtml} side="left" />
+              </div>
+
+              {/* Center navigation buttons */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  paddingTop: '2px',
+                  gap: '2px',
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
+                  disabled={!canBothPrev}
+                  onClick={() => shiftBoth(-1)}
+                  title="両方を前のリビジョンへ"
+                >
+                  ◀
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
+                  disabled={!canBothNext}
+                  onClick={() => shiftBoth(1)}
+                  title="両方を次のリビジョンへ"
+                >
+                  ▶
+                </button>
               </div>
 
               {/* Right panel */}
@@ -144,6 +214,10 @@ export function DiffModal({ revisions, loading, error, onClose }: Props) {
                   revisions={revisions}
                   selectedId={rightId}
                   onChange={setRightId}
+                  onPrev={() => setRightId((prev) => shiftRevision(prev, -1))}
+                  onNext={() => setRightId((prev) => shiftRevision(prev, 1))}
+                  canPrev={canRightPrev}
+                  canNext={canRightNext}
                 />
                 <DiffPanel html={rightHtml} side="right" />
               </div>
