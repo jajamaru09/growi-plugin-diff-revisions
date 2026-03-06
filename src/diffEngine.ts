@@ -63,27 +63,45 @@ function cleanStructuralArtifacts(html: string, highlightTag: 'ins' | 'del'): st
 export function computeDiff(leftHtml: string, rightHtml: string): DiffResult {
   const diffHtml = HtmlDiff.execute(leftHtml, rightHtml);
 
+  // [DEBUG] htmldiff-js merged output
+  console.log('[DEBUG] === leftHtml (input) ===');
+  console.log(leftHtml);
+  console.log('[DEBUG] === rightHtml (input) ===');
+  console.log(rightHtml);
+  console.log('[DEBUG] === htmldiff-js merged output ===');
+  console.log(diffHtml);
+
   // For the left panel: show deletions highlighted, strip insertions
-  const left = cleanStructuralArtifacts(
-    removeEmptyBlocks(
-      diffHtml
-        .replace(/<ins[^>]*>[\s\S]*?<\/ins>/gi, '')
-        .replace(/<del([^>]*)>/gi, '<del$1>')
-        .replace(/<\/del>/gi, '</del>'),
-    ),
-    'del',
-  );
+  const leftStripped = diffHtml
+    .replace(/<ins[^>]*>[\s\S]*?<\/ins>/gi, '')
+    .replace(/<del([^>]*)>/gi, '<del$1>')
+    .replace(/<\/del>/gi, '</del>');
+  console.log('[DEBUG] === left after strip ins ===');
+  console.log(leftStripped);
+
+  const leftCleaned = removeEmptyBlocks(leftStripped);
+  console.log('[DEBUG] === left after removeEmptyBlocks ===');
+  console.log(leftCleaned);
+
+  const left = cleanStructuralArtifacts(leftCleaned, 'del');
+  console.log('[DEBUG] === left after cleanStructuralArtifacts ===');
+  console.log(left);
 
   // For the right panel: show insertions highlighted, strip deletions
-  const right = cleanStructuralArtifacts(
-    removeEmptyBlocks(
-      diffHtml
-        .replace(/<del[^>]*>[\s\S]*?<\/del>/gi, '')
-        .replace(/<ins([^>]*)>/gi, '<ins$1>')
-        .replace(/<\/ins>/gi, '</ins>'),
-    ),
-    'ins',
-  );
+  const rightStripped = diffHtml
+    .replace(/<del[^>]*>[\s\S]*?<\/del>/gi, '')
+    .replace(/<ins([^>]*)>/gi, '<ins$1>')
+    .replace(/<\/ins>/gi, '</ins>');
+  console.log('[DEBUG] === right after strip del ===');
+  console.log(rightStripped);
+
+  const rightCleaned = removeEmptyBlocks(rightStripped);
+  console.log('[DEBUG] === right after removeEmptyBlocks ===');
+  console.log(rightCleaned);
+
+  const right = cleanStructuralArtifacts(rightCleaned, 'ins');
+  console.log('[DEBUG] === right after cleanStructuralArtifacts ===');
+  console.log(right);
 
   return { left, right };
 }
