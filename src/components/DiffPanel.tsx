@@ -1,3 +1,5 @@
+import { forwardRef } from 'react';
+
 interface Props {
   html: string;
   side: 'left' | 'right';
@@ -14,9 +16,10 @@ const DIFF_STYLES = `
   }
 `;
 
-export function DiffPanel({ html, side }: Props) {
+export const DiffPanel = forwardRef<HTMLDivElement, Props>(function DiffPanel({ html, side }, ref) {
   return (
     <div
+      ref={ref}
       style={{
         flex: 1,
         overflow: 'auto',
@@ -38,4 +41,4 @@ export function DiffPanel({ html, side }: Props) {
       )}
     </div>
   );
-}
+});

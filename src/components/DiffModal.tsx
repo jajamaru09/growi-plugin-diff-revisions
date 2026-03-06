@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { RevisionItem } from '../types.ts';
 import { RevisionSelector } from './RevisionSelector.tsx';
 import { DiffPanel } from './DiffPanel.tsx';
 import { renderMarkdown } from '../markdownRenderer.ts';
 import { computeDiff } from '../diffEngine.ts';
+import { useSyncScroll } from '../useSyncScroll.ts';
 
 interface Props {
   revisions: RevisionItem[];
@@ -19,6 +20,17 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
   const [rightId, setRightId] = useState<string>('');
   const [leftHtml, setLeftHtml] = useState<string>('');
   const [rightHtml, setRightHtml] = useState<string>('');
+  const [syncScroll, setSyncScroll] = useState(true);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+
+  useSyncScroll({
+    leftRef: leftPanelRef,
+    rightRef: rightPanelRef,
+    enabled: syncScroll,
+    leftHtml,
+    rightHtml,
+  });
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -143,12 +155,26 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
           }}
         >
           <h5 style={{ margin: 0 }}>差分比較</h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={onClose}
-            aria-label="Close"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="form-check form-switch" style={{ margin: 0 }}>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="syncScrollToggle"
+                checked={syncScroll}
+                onChange={(e) => setSyncScroll(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="syncScrollToggle" style={{ fontSize: '14px' }}>
+                スクロール連動
+              </label>
+            </div>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={onClose}
+              aria-label="Close"
+            />
+          </div>
         </div>
 
         {/* Body */}
@@ -175,7 +201,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                   canPrev={canLeftPrev}
                   canNext={canLeftNext}
                 />
-                <DiffPanel html={leftHtml} side="left" />
+                <DiffPanel ref={leftPanelRef} html={leftHtml} side="left" />
               </div>
 
               {/* Center navigation buttons */}
@@ -222,7 +248,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                   canPrev={canRightPrev}
                   canNext={canRightNext}
                 />
-                <DiffPanel html={rightHtml} side="right" />
+                <DiffPanel ref={rightPanelRef} html={rightHtml} side="right" />
               </div>
             </div>
           )}
