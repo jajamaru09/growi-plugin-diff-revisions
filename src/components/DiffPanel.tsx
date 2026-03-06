@@ -14,6 +14,18 @@ const DIFF_STYLES = `
     background-color: #ffebe9;
     text-decoration: none;
   }
+  .diff-del {
+    background-color: #ffebe9;
+  }
+  .diff-ins {
+    background-color: #e6ffec;
+  }
+  .diff-block-del {
+    background-color: #ffebe9;
+  }
+  .diff-block-ins {
+    background-color: #e6ffec;
+  }
 `;
 
 export const DiffPanel = forwardRef<HTMLDivElement, Props>(function DiffPanel({ html, side }, ref) {
