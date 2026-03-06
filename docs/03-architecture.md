@@ -64,3 +64,9 @@
 | Markdownレンダリング + 差分表示 | 5秒以内 |
 | モーダル初期表示 | 1秒以内 |
 | バンドルサイズ | 可能な限り小さく（remark/rehype依存のため監視） |
+
+## 変更履歴
+
+| ステアリング | 変更内容 |
+|---|---|
+| [#02-html-diff-redesign](.steering/20260307-02-html-diff-redesign/) | テクノロジースタックに影響: htmldiff-jsからDOMParser+diffパッケージベースのブロック差分エンジンに変更 |

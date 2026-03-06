@@ -208,3 +208,6 @@ del, .diff-removed {
 | [#01-dropdown-order-and-default-selection](.steering/20260306-01-dropdown-order-and-default-selection/) | ワイヤフレーム・RevisionSelectorに影響: ドロップダウン降順表示、デフォルトリビジョン選択を追加 |
 | [#02-revision-navigation-buttons](.steering/20260306-02-revision-navigation-buttons/) | ワイヤフレーム・コンポーネント設計に影響: RevisionSelectorに増減ボタン追加、DiffModalに中央同時増減ボタン追加 |
 | [#03-open-revision-link](.steering/20260306-03-open-revision-link/) | コンポーネント設計に影響: RevisionSelectorにリビジョン閲覧リンク追加、DiffModal・DiffButtonにpageId受け渡し追加 |
+| [#04-synchronized-scroll](.steering/20260306-04-synchronized-scroll/) | コンポーネント設計に影響: DiffModalにスクロール連動ON/OFFトグル追加、useSyncScroll・syncScrollUtilsを新規追加 |
+| [#06-markdown-diff-mode](.steering/20260306-06-markdown-diff-mode/) | ワイヤフレーム・コンポーネント設計・差分検出方針に影響: MarkdownDiffPanel・markdownDiffEngineを新規追加、DiffModalにHTML/Markdownモード切替UIを追加 |
+| [#02-html-diff-redesign](.steering/20260307-02-html-diff-redesign/) | 差分検出方針(§7)に影響: htmldiff-jsマージ方式を廃止しブロック単位マッチング方式に変更、blockDiffEngineを新規追加 |

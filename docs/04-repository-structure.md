@@ -56,3 +56,11 @@ growi-plugin-diff-revisions/
 - **ユーティリティ/サービス**: `src/` 直下にcamelCaseファイル名
 - **型定義**: 共通型は `src/types.ts`、コンポーネント固有の型はコンポーネントファイル内
 - **ビルド成果物**: `dist/` に出力、GROWIプラグインとして配布するためgit管理対象
+
+## 変更履歴
+
+| ステアリング | 変更内容 |
+|---|---|
+| [#04-synchronized-scroll](.steering/20260306-04-synchronized-scroll/) | ファイル構成に影響: syncScrollUtils.ts、useSyncScroll.tsを追加 |
+| [#06-markdown-diff-mode](.steering/20260306-06-markdown-diff-mode/) | ファイル構成に影響: markdownDiffEngine.ts、MarkdownDiffPanel.tsxを追加 |
+| [#02-html-diff-redesign](.steering/20260307-02-html-diff-redesign/) | ファイル構成に影響: blockDiffEngine.tsを追加、diffEngine.tsの役割を委譲に変更 |
