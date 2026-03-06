@@ -66,5 +66,5 @@ export function useSyncScroll({ leftRef, rightRef, enabled, leftHtml, rightHtml 
       rightEl.removeEventListener('scroll', onRightScroll);
       cancelAnimationFrame(rafIdRef.current);
     };
-  }, [leftRef, rightRef, enabled]);
+  }, [leftRef, rightRef, enabled, leftHtml, rightHtml]);
 }
