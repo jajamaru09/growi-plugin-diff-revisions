@@ -18,16 +18,9 @@ function removeEmptyBlocks(html: string): string {
   }
 }
 
-/** Check if a <li> element contains only highlight tags (ins/del) and whitespace — no plain text. */
-function isHighlightOnly(li: Element, tag: string): boolean {
-  for (const node of Array.from(li.childNodes)) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      if (node.textContent && node.textContent.trim() !== '') return false;
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      if ((node as Element).tagName.toLowerCase() !== tag) return false;
-    }
-  }
-  return li.childNodes.length > 0;
+/** Check if a <li> element contains any highlight tag (ins/del). */
+function containsHighlight(li: Element, tag: string): boolean {
+  return li.querySelector(tag) !== null;
 }
 
 /**
@@ -45,8 +38,8 @@ function cleanStructuralArtifacts(html: string, highlightTag: 'ins' | 'del'): st
     const items = Array.from(list.querySelectorAll(':scope > li'));
     if (items.length === 0) return;
 
-    const allHighlightOnly = items.every((li) => isHighlightOnly(li, highlightTag));
-    if (!allHighlightOnly) return;
+    const allContainHighlight = items.every((li) => containsHighlight(li, highlightTag));
+    if (!allContainHighlight) return;
 
     // Extract content from each li and insert before the list
     items.forEach((li) => {
