@@ -18,23 +18,71 @@ function removeEmptyBlocks(html: string): string {
   }
 }
 
+/** Check if a <li> element contains only highlight tags (ins/del) and whitespace — no plain text. */
+function isHighlightOnly(li: Element, tag: string): boolean {
+  for (const node of Array.from(li.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.textContent && node.textContent.trim() !== '') return false;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if ((node as Element).tagName.toLowerCase() !== tag) return false;
+    }
+  }
+  return li.childNodes.length > 0;
+}
+
+/**
+ * Remove list structures that are artifacts from the other revision.
+ * If ALL <li> children of a <ul>/<ol> contain only highlighted content,
+ * the list belongs to the other revision — unwrap the content and remove the list.
+ */
+function cleanStructuralArtifacts(html: string, highlightTag: 'ins' | 'del'): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
+  const body = doc.body;
+
+  const lists = body.querySelectorAll('ul, ol');
+  lists.forEach((list) => {
+    const items = Array.from(list.querySelectorAll(':scope > li'));
+    if (items.length === 0) return;
+
+    const allHighlightOnly = items.every((li) => isHighlightOnly(li, highlightTag));
+    if (!allHighlightOnly) return;
+
+    // Extract content from each li and insert before the list
+    items.forEach((li) => {
+      while (li.firstChild) {
+        list.parentNode!.insertBefore(li.firstChild, list);
+      }
+    });
+    list.remove();
+  });
+
+  return body.innerHTML;
+}
+
 export function computeDiff(leftHtml: string, rightHtml: string): DiffResult {
   const diffHtml = HtmlDiff.execute(leftHtml, rightHtml);
 
   // For the left panel: show deletions highlighted, strip insertions
-  const left = removeEmptyBlocks(
-    diffHtml
-      .replace(/<ins[^>]*>[\s\S]*?<\/ins>/gi, '')
-      .replace(/<del([^>]*)>/gi, '<del$1>')
-      .replace(/<\/del>/gi, '</del>'),
+  const left = cleanStructuralArtifacts(
+    removeEmptyBlocks(
+      diffHtml
+        .replace(/<ins[^>]*>[\s\S]*?<\/ins>/gi, '')
+        .replace(/<del([^>]*)>/gi, '<del$1>')
+        .replace(/<\/del>/gi, '</del>'),
+    ),
+    'del',
   );
 
   // For the right panel: show insertions highlighted, strip deletions
-  const right = removeEmptyBlocks(
-    diffHtml
-      .replace(/<del[^>]*>[\s\S]*?<\/del>/gi, '')
-      .replace(/<ins([^>]*)>/gi, '<ins$1>')
-      .replace(/<\/ins>/gi, '</ins>'),
+  const right = cleanStructuralArtifacts(
+    removeEmptyBlocks(
+      diffHtml
+        .replace(/<del[^>]*>[\s\S]*?<\/del>/gi, '')
+        .replace(/<ins([^>]*)>/gi, '<ins$1>')
+        .replace(/<\/ins>/gi, '</ins>'),
+    ),
+    'ins',
   );
 
   return { left, right };
