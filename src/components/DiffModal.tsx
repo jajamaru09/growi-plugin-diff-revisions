@@ -6,6 +6,7 @@ import { DiffPanel } from './DiffPanel.tsx';
 import { renderMarkdown } from '../markdownRenderer.ts';
 import { computeDiff } from '../diffEngine.ts';
 import { useSyncScroll } from '../useSyncScroll.ts';
+import { MarkdownDiffPanel } from './MarkdownDiffPanel.tsx';
 
 interface Props {
   revisions: RevisionItem[];
@@ -21,13 +22,14 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
   const [leftHtml, setLeftHtml] = useState<string>('');
   const [rightHtml, setRightHtml] = useState<string>('');
   const [syncScroll, setSyncScroll] = useState(true);
+  const [diffMode, setDiffMode] = useState<'html' | 'markdown'>('html');
   const [leftPanelEl, setLeftPanelEl] = useState<HTMLDivElement | null>(null);
   const [rightPanelEl, setRightPanelEl] = useState<HTMLDivElement | null>(null);
 
   useSyncScroll({
     leftEl: leftPanelEl,
     rightEl: rightPanelEl,
-    enabled: syncScroll,
+    enabled: syncScroll && diffMode === 'html',
     leftHtml,
     rightHtml,
   });
@@ -156,18 +158,36 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
         >
           <h5 style={{ margin: 0 }}>差分比較</h5>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="form-check form-switch" style={{ margin: 0 }}>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="syncScrollToggle"
-                checked={syncScroll}
-                onChange={(e) => setSyncScroll(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="syncScrollToggle" style={{ fontSize: '14px' }}>
-                スクロール連動
-              </label>
+            <div className="btn-group btn-group-sm">
+              <button
+                type="button"
+                className={`btn ${diffMode === 'html' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setDiffMode('html')}
+              >
+                HTML
+              </button>
+              <button
+                type="button"
+                className={`btn ${diffMode === 'markdown' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setDiffMode('markdown')}
+              >
+                Markdown
+              </button>
             </div>
+            {diffMode === 'html' && (
+              <div className="form-check form-switch" style={{ margin: 0 }}>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="syncScrollToggle"
+                  checked={syncScroll}
+                  onChange={(e) => setSyncScroll(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="syncScrollToggle" style={{ fontSize: '14px' }}>
+                  スクロール連動
+                </label>
+              </div>
+            )}
             <button
               type="button"
               className="btn-close"
@@ -182,74 +202,70 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
           {loading && <p>読み込み中...</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
           {!loading && !error && (
-            <div
-              style={{
-                display: 'flex',
-                gap: '16px',
-                height: '100%',
-              }}
-            >
-              {/* Left panel */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <RevisionSelector
-                  revisions={revisions}
-                  selectedId={leftId}
-                  pageId={pageId}
-                  onChange={setLeftId}
-                  onPrev={() => setLeftId((prev) => shiftRevision(prev, -1))}
-                  onNext={() => setLeftId((prev) => shiftRevision(prev, 1))}
-                  canPrev={canLeftPrev}
-                  canNext={canLeftNext}
-                />
-                <DiffPanel ref={setLeftPanelEl} html={leftHtml} side="left" />
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '8px' }}>
+              {/* Revision selectors row */}
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <RevisionSelector
+                    revisions={revisions}
+                    selectedId={leftId}
+                    pageId={pageId}
+                    onChange={setLeftId}
+                    onPrev={() => setLeftId((prev) => shiftRevision(prev, -1))}
+                    onNext={() => setLeftId((prev) => shiftRevision(prev, 1))}
+                    canPrev={canLeftPrev}
+                    canNext={canLeftNext}
+                  />
+                </div>
+                {/* Center navigation buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '2px', gap: '2px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
+                    disabled={!canBothPrev}
+                    onClick={() => shiftBoth(-1)}
+                    title="両方を前のリビジョンへ"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
+                    disabled={!canBothNext}
+                    onClick={() => shiftBoth(1)}
+                    title="両方を次のリビジョンへ"
+                  >
+                    ▶
+                  </button>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <RevisionSelector
+                    revisions={revisions}
+                    selectedId={rightId}
+                    pageId={pageId}
+                    onChange={setRightId}
+                    onPrev={() => setRightId((prev) => shiftRevision(prev, -1))}
+                    onNext={() => setRightId((prev) => shiftRevision(prev, 1))}
+                    canPrev={canRightPrev}
+                    canNext={canRightNext}
+                  />
+                </div>
               </div>
 
-              {/* Center navigation buttons */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  paddingTop: '2px',
-                  gap: '2px',
-                }}
-              >
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
-                  disabled={!canBothPrev}
-                  onClick={() => shiftBoth(-1)}
-                  title="両方を前のリビジョンへ"
-                >
-                  ◀
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
-                  disabled={!canBothNext}
-                  onClick={() => shiftBoth(1)}
-                  title="両方を次のリビジョンへ"
-                >
-                  ▶
-                </button>
-              </div>
-
-              {/* Right panel */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <RevisionSelector
-                  revisions={revisions}
-                  selectedId={rightId}
-                  pageId={pageId}
-                  onChange={setRightId}
-                  onPrev={() => setRightId((prev) => shiftRevision(prev, -1))}
-                  onNext={() => setRightId((prev) => shiftRevision(prev, 1))}
-                  canPrev={canRightPrev}
-                  canNext={canRightNext}
+              {/* Diff content area */}
+              {diffMode === 'html' ? (
+                <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+                  <DiffPanel ref={setLeftPanelEl} html={leftHtml} side="left" />
+                  <DiffPanel ref={setRightPanelEl} html={rightHtml} side="right" />
+                </div>
+              ) : (
+                <MarkdownDiffPanel
+                  leftBody={revisions.find((r) => r.revisionId === leftId)?.body ?? ''}
+                  rightBody={revisions.find((r) => r.revisionId === rightId)?.body ?? ''}
                 />
-                <DiffPanel ref={setRightPanelEl} html={rightHtml} side="right" />
-              </div>
+              )}
             </div>
           )}
         </div>
