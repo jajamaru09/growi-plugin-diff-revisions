@@ -15,14 +15,14 @@ const ROW_COLORS: Record<SideBySideLine['type'], { leftBg: string; rightBg: stri
   },
   removed: {
     leftBg: '#ffebe9',
-    rightBg: 'transparent',
+    rightBg: '#f0f0f0',
     leftNumBg: '#ffd7d5',
-    rightNumBg: 'transparent',
+    rightNumBg: '#e8e8e8',
   },
   added: {
-    leftBg: 'transparent',
+    leftBg: '#f0f0f0',
     rightBg: '#e6ffec',
-    leftNumBg: 'transparent',
+    leftNumBg: '#e8e8e8',
     rightNumBg: '#ccffd8',
   },
   modified: {
