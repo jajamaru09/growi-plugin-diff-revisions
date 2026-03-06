@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { RevisionItem } from '../types.ts';
 import { RevisionSelector } from './RevisionSelector.tsx';
@@ -21,12 +21,12 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
   const [leftHtml, setLeftHtml] = useState<string>('');
   const [rightHtml, setRightHtml] = useState<string>('');
   const [syncScroll, setSyncScroll] = useState(true);
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [leftPanelEl, setLeftPanelEl] = useState<HTMLDivElement | null>(null);
+  const [rightPanelEl, setRightPanelEl] = useState<HTMLDivElement | null>(null);
 
   useSyncScroll({
-    leftRef: leftPanelRef,
-    rightRef: rightPanelRef,
+    leftEl: leftPanelEl,
+    rightEl: rightPanelEl,
     enabled: syncScroll,
     leftHtml,
     rightHtml,
@@ -201,7 +201,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                   canPrev={canLeftPrev}
                   canNext={canLeftNext}
                 />
-                <DiffPanel ref={leftPanelRef} html={leftHtml} side="left" />
+                <DiffPanel ref={setLeftPanelEl} html={leftHtml} side="left" />
               </div>
 
               {/* Center navigation buttons */}
@@ -248,7 +248,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                   canPrev={canRightPrev}
                   canNext={canRightNext}
                 />
-                <DiffPanel ref={rightPanelRef} html={rightHtml} side="right" />
+                <DiffPanel ref={setRightPanelEl} html={rightHtml} side="right" />
               </div>
             </div>
           )}

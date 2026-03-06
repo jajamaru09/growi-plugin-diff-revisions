@@ -1,23 +1,21 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef } from 'react';
 import { extractBlockElements, buildAnchorPairs, computeTargetScroll } from './syncScrollUtils.ts';
 
 interface UseSyncScrollOptions {
-  leftRef: RefObject<HTMLDivElement | null>;
-  rightRef: RefObject<HTMLDivElement | null>;
+  leftEl: HTMLDivElement | null;
+  rightEl: HTMLDivElement | null;
   enabled: boolean;
   leftHtml: string;
   rightHtml: string;
 }
 
-export function useSyncScroll({ leftRef, rightRef, enabled, leftHtml, rightHtml }: UseSyncScrollOptions): void {
+export function useSyncScroll({ leftEl, rightEl, enabled, leftHtml, rightHtml }: UseSyncScrollOptions): void {
   const anchorPairsRef = useRef<[HTMLElement, HTMLElement][]>([]);
   const isScrollingRef = useRef(false);
   const rafIdRef = useRef(0);
 
-  // Rebuild anchor pairs when HTML changes
+  // Rebuild anchor pairs when HTML changes or elements become available
   useEffect(() => {
-    const leftEl = leftRef.current;
-    const rightEl = rightRef.current;
     if (!leftEl || !rightEl || !enabled) {
       anchorPairsRef.current = [];
       return;
@@ -31,12 +29,10 @@ export function useSyncScroll({ leftRef, rightRef, enabled, leftHtml, rightHtml 
     });
 
     return () => cancelAnimationFrame(id);
-  }, [leftRef, rightRef, enabled, leftHtml, rightHtml]);
+  }, [leftEl, rightEl, enabled, leftHtml, rightHtml]);
 
   // Attach scroll listeners
   useEffect(() => {
-    const leftEl = leftRef.current;
-    const rightEl = rightRef.current;
     if (!leftEl || !rightEl || !enabled) return;
 
     const handleScroll = (source: HTMLElement, target: HTMLElement, side: 'left' | 'right') => {
@@ -66,5 +62,5 @@ export function useSyncScroll({ leftRef, rightRef, enabled, leftHtml, rightHtml 
       rightEl.removeEventListener('scroll', onRightScroll);
       cancelAnimationFrame(rafIdRef.current);
     };
-  }, [leftRef, rightRef, enabled, leftHtml, rightHtml]);
+  }, [leftEl, rightEl, enabled, leftHtml, rightHtml]);
 }
