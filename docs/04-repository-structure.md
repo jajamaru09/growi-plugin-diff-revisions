@@ -64,3 +64,4 @@ growi-plugin-diff-revisions/
 | [#04-synchronized-scroll](.steering/20260306-04-synchronized-scroll/) | ファイル構成に影響: syncScrollUtils.ts、useSyncScroll.tsを追加 |
 | [#06-markdown-diff-mode](.steering/20260306-06-markdown-diff-mode/) | ファイル構成に影響: markdownDiffEngine.ts、MarkdownDiffPanel.tsxを追加 |
 | [#02-html-diff-redesign](.steering/20260307-02-html-diff-redesign/) | ファイル構成に影響: blockDiffEngine.tsを追加、diffEngine.tsの役割を委譲に変更 |
+| [#03-refactoring](.steering/20260307-03-refactoring/) | ファイル構成に影響: lcs.ts・useRevisionNavigation.tsを追加、diffEngine.ts・htmldiff-js.d.tsを削除 |

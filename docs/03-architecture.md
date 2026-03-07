@@ -70,3 +70,4 @@
 | ステアリング | 変更内容 |
 |---|---|
 | [#02-html-diff-redesign](.steering/20260307-02-html-diff-redesign/) | テクノロジースタックに影響: htmldiff-jsからDOMParser+diffパッケージベースのブロック差分エンジンに変更 |
+| [#03-refactoring](.steering/20260307-03-refactoring/) | テクノロジースタックに影響: htmldiff-js依存を完全削除、LCSアルゴリズムを共通ユーティリティ(lcs.ts)に抽出 |
