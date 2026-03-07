@@ -1,4 +1,5 @@
 import { diffChars, type Change } from 'diff';
+import { lcs } from './lcs.ts';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -117,37 +118,7 @@ function blocksMatch(a: Block, b: Block): boolean {
 
 /** LCS-based block matching. Returns a list of BlockDiff entries. */
 export function matchBlocks(left: Block[], right: Block[]): BlockDiff[] {
-  const m = left.length;
-  const n = right.length;
-
-  // Build LCS table
-  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (blocksMatch(left[i - 1], right[j - 1])) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-  }
-
-  // Backtrack to find matched pairs
-  const matched: Array<[number, number]> = [];
-  let i = m;
-  let j = n;
-  while (i > 0 && j > 0) {
-    if (blocksMatch(left[i - 1], right[j - 1])) {
-      matched.push([i - 1, j - 1]);
-      i--;
-      j--;
-    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
-      i--;
-    } else {
-      j--;
-    }
-  }
-  matched.reverse();
+  const matched = lcs(left, right, blocksMatch);
 
   // Build diff list
   const diffs: BlockDiff[] = [];
@@ -178,11 +149,11 @@ export function matchBlocks(left: Block[], right: Block[]): BlockDiff[] {
   }
 
   // Remaining unmatched blocks
-  while (li < m) {
+  while (li < left.length) {
     diffs.push({ type: 'removed', leftBlock: left[li], rightBlock: null });
     li++;
   }
-  while (ri < n) {
+  while (ri < right.length) {
     diffs.push({ type: 'added', leftBlock: null, rightBlock: right[ri] });
     ri++;
   }

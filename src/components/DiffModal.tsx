@@ -4,8 +4,9 @@ import type { RevisionItem } from '../types.ts';
 import { RevisionSelector } from './RevisionSelector.tsx';
 import { DiffPanel } from './DiffPanel.tsx';
 import { renderMarkdown } from '../markdownRenderer.ts';
-import { computeDiff } from '../diffEngine.ts';
+import { computeBlockDiff } from '../blockDiffEngine.ts';
 import { useSyncScroll } from '../useSyncScroll.ts';
+import { useRevisionNavigation } from '../useRevisionNavigation.ts';
 import { MarkdownDiffPanel } from './MarkdownDiffPanel.tsx';
 
 interface Props {
@@ -17,10 +18,9 @@ interface Props {
 }
 
 export function DiffModal({ revisions, loading, error, pageId, onClose }: Props) {
-  const [leftId, setLeftId] = useState<string>('');
-  const [rightId, setRightId] = useState<string>('');
-  const [leftHtml, setLeftHtml] = useState<string>('');
-  const [rightHtml, setRightHtml] = useState<string>('');
+  const nav = useRevisionNavigation(revisions);
+  const [leftHtml, setLeftHtml] = useState('');
+  const [rightHtml, setRightHtml] = useState('');
   const [syncScroll, setSyncScroll] = useState(true);
   const [diffMode, setDiffMode] = useState<'html' | 'markdown'>('html');
   const [leftPanelEl, setLeftPanelEl] = useState<HTMLDivElement | null>(null);
@@ -46,55 +46,10 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Set default revision selection when revisions are loaded
-  useEffect(() => {
-    if (revisions.length >= 2) {
-      setLeftId(revisions[revisions.length - 2].revisionId);
-      setRightId(revisions[revisions.length - 1].revisionId);
-    } else if (revisions.length === 1) {
-      setLeftId('');
-      setRightId(revisions[0].revisionId);
-    }
-  }, [revisions]);
-
-  // Revision navigation helpers
-  const getIndex = useCallback(
-    (id: string) => revisions.findIndex((r) => r.revisionId === id),
-    [revisions],
-  );
-
-  const shiftRevision = useCallback(
-    (currentId: string, delta: number): string => {
-      const idx = getIndex(currentId);
-      if (idx < 0) return currentId;
-      const next = idx + delta;
-      if (next < 0 || next >= revisions.length) return currentId;
-      return revisions[next].revisionId;
-    },
-    [getIndex, revisions],
-  );
-
-  const leftIdx = getIndex(leftId);
-  const rightIdx = getIndex(rightId);
-  const canLeftPrev = leftIdx > 0;
-  const canLeftNext = leftIdx >= 0 && leftIdx < revisions.length - 1;
-  const canRightPrev = rightIdx > 0;
-  const canRightNext = rightIdx >= 0 && rightIdx < revisions.length - 1;
-  const canBothPrev = canLeftPrev && canRightPrev;
-  const canBothNext = canLeftNext && canRightNext;
-
-  const shiftBoth = useCallback(
-    (delta: number) => {
-      setLeftId((prev) => shiftRevision(prev, delta));
-      setRightId((prev) => shiftRevision(prev, delta));
-    },
-    [shiftRevision],
-  );
-
   // Compute diff when both revisions are selected
   useEffect(() => {
-    const left = revisions.find((r) => r.revisionId === leftId);
-    const right = revisions.find((r) => r.revisionId === rightId);
+    const left = revisions.find((r) => r.revisionId === nav.leftId);
+    const right = revisions.find((r) => r.revisionId === nav.rightId);
     if (!left || !right) {
       setLeftHtml('');
       setRightHtml('');
@@ -110,7 +65,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
       ]);
       if (cancelled) return;
 
-      const diffResult = computeDiff(lHtml, rHtml);
+      const diffResult = computeBlockDiff(lHtml, rHtml);
       setLeftHtml(diffResult.left);
       setRightHtml(diffResult.right);
     })();
@@ -118,7 +73,7 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
     return () => {
       cancelled = true;
     };
-  }, [leftId, rightId, revisions]);
+  }, [nav.leftId, nav.rightId, revisions]);
 
   const modal = (
     <div
@@ -208,13 +163,13 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <RevisionSelector
                     revisions={revisions}
-                    selectedId={leftId}
+                    selectedId={nav.leftId}
                     pageId={pageId}
-                    onChange={setLeftId}
-                    onPrev={() => setLeftId((prev) => shiftRevision(prev, -1))}
-                    onNext={() => setLeftId((prev) => shiftRevision(prev, 1))}
-                    canPrev={canLeftPrev}
-                    canNext={canLeftNext}
+                    onChange={nav.setLeftId}
+                    onPrev={() => nav.setLeftId((prev) => nav.shiftRevision(prev, -1))}
+                    onNext={() => nav.setLeftId((prev) => nav.shiftRevision(prev, 1))}
+                    canPrev={nav.canLeftPrev}
+                    canNext={nav.canLeftNext}
                   />
                 </div>
                 {/* Center navigation buttons */}
@@ -223,8 +178,8 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                     type="button"
                     className="btn btn-outline-secondary btn-sm"
                     style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
-                    disabled={!canBothPrev}
-                    onClick={() => shiftBoth(-1)}
+                    disabled={!nav.canBothPrev}
+                    onClick={() => nav.shiftBoth(-1)}
                     title="両方を前のリビジョンへ"
                   >
                     ◀
@@ -233,8 +188,8 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                     type="button"
                     className="btn btn-outline-secondary btn-sm"
                     style={{ padding: '2px 6px', fontSize: '14px', lineHeight: 1 }}
-                    disabled={!canBothNext}
-                    onClick={() => shiftBoth(1)}
+                    disabled={!nav.canBothNext}
+                    onClick={() => nav.shiftBoth(1)}
                     title="両方を次のリビジョンへ"
                   >
                     ▶
@@ -243,13 +198,13 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <RevisionSelector
                     revisions={revisions}
-                    selectedId={rightId}
+                    selectedId={nav.rightId}
                     pageId={pageId}
-                    onChange={setRightId}
-                    onPrev={() => setRightId((prev) => shiftRevision(prev, -1))}
-                    onNext={() => setRightId((prev) => shiftRevision(prev, 1))}
-                    canPrev={canRightPrev}
-                    canNext={canRightNext}
+                    onChange={nav.setRightId}
+                    onPrev={() => nav.setRightId((prev) => nav.shiftRevision(prev, -1))}
+                    onNext={() => nav.setRightId((prev) => nav.shiftRevision(prev, 1))}
+                    canPrev={nav.canRightPrev}
+                    canNext={nav.canRightNext}
                   />
                 </div>
               </div>
@@ -262,8 +217,8 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                 </div>
               ) : (
                 <MarkdownDiffPanel
-                  leftBody={revisions.find((r) => r.revisionId === leftId)?.body ?? ''}
-                  rightBody={revisions.find((r) => r.revisionId === rightId)?.body ?? ''}
+                  leftBody={revisions.find((r) => r.revisionId === nav.leftId)?.body ?? ''}
+                  rightBody={revisions.find((r) => r.revisionId === nav.rightId)?.body ?? ''}
                 />
               )}
             </div>

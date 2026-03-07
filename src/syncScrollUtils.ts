@@ -1,3 +1,5 @@
+import { lcs } from './lcs.ts';
+
 const BLOCK_SELECTORS = 'h1, h2, h3, h4, h5, h6, p, table, ul, ol, blockquote, pre';
 const HEADING_TAGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 const PREFIX_LENGTH = 20;
@@ -54,40 +56,8 @@ export function buildAnchorPairs(
   leftBlocks: BlockInfo[],
   rightBlocks: BlockInfo[],
 ): [HTMLElement, HTMLElement][] {
-  const m = leftBlocks.length;
-  const n = rightBlocks.length;
-  if (m === 0 || n === 0) return [];
-
-  // Build LCS table
-  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (isSimilar(leftBlocks[i - 1], rightBlocks[j - 1])) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-  }
-
-  // Backtrack to find matched pairs
-  const pairs: [HTMLElement, HTMLElement][] = [];
-  let i = m;
-  let j = n;
-  while (i > 0 && j > 0) {
-    if (isSimilar(leftBlocks[i - 1], rightBlocks[j - 1])) {
-      pairs.push([leftBlocks[i - 1].element, rightBlocks[j - 1].element]);
-      i--;
-      j--;
-    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
-      i--;
-    } else {
-      j--;
-    }
-  }
-
-  pairs.reverse();
-  return pairs;
+  const matched = lcs(leftBlocks, rightBlocks, isSimilar);
+  return matched.map(([li, ri]) => [leftBlocks[li].element, rightBlocks[ri].element]);
 }
 
 /**
