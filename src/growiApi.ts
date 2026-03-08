@@ -2,6 +2,19 @@ import type { Revision, RevisionItem } from './types.ts';
 
 const LIMIT = 100;
 
+interface PageResponse {
+  page: { _id: string };
+}
+
+export async function fetchPageIdByPath(path: string): Promise<string> {
+  const res = await fetch(`/_api/v3/page/?path=${encodeURIComponent(path)}`);
+  if (!res.ok) {
+    throw new Error(`ページ情報の取得に失敗しました: ${res.status}`);
+  }
+  const data: PageResponse = await res.json();
+  return data.page._id;
+}
+
 interface RevisionListResponse {
   revisions: Revision[];
   totalCount: number;

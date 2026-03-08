@@ -1,5 +1,5 @@
 import type { GrowiPageContext, PageMode } from './types.ts';
-import { extractPageId, hashToMode, isPageIdUrl } from './pageContext.ts';
+import { extractPageId, hashToMode, isPageIdUrl, isRootPage } from './pageContext.ts';
 
 type PageChangeCallback = (ctx: GrowiPageContext) => void | Promise<void>;
 
@@ -9,9 +9,12 @@ export function createPageChangeListener(callback: PageChangeCallback) {
 
   function buildContext(url: URL): GrowiPageContext | null {
     if (!isPageIdUrl(url.pathname)) return null;
+    const mode: PageMode = hashToMode(url.hash);
+    if (isRootPage(url.pathname)) {
+      return { pageId: '', mode };
+    }
     const pageId = extractPageId(url.pathname);
     if (!pageId) return null;
-    const mode: PageMode = hashToMode(url.hash);
     return { pageId, mode };
   }
 

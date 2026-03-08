@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { RevisionItem } from '../types.ts';
-import { fetchAllRevisions } from '../growiApi.ts';
+import { fetchAllRevisions, fetchPageIdByPath } from '../growiApi.ts';
 import { DiffModal } from './DiffModal.tsx';
 
 interface Props {
@@ -13,10 +13,12 @@ export function DiffButton({ pageId, cssClass }: Props) {
   const [revisions, setRevisions] = useState<RevisionItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedPageId, setResolvedPageId] = useState(pageId);
 
-  // Close modal on page change
+  // Close modal and update resolvedPageId on page change
   useEffect(() => {
     setIsOpen(false);
+    setResolvedPageId(pageId);
   }, [pageId]);
 
   const handleOpen = useCallback(async () => {
@@ -24,7 +26,12 @@ export function DiffButton({ pageId, cssClass }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const items = await fetchAllRevisions(pageId);
+      let targetPageId = pageId;
+      if (!pageId) {
+        targetPageId = await fetchPageIdByPath('/');
+        setResolvedPageId(targetPageId);
+      }
+      const items = await fetchAllRevisions(targetPageId);
       setRevisions(items);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'リビジョンの取得に失敗しました');
@@ -51,7 +58,7 @@ export function DiffButton({ pageId, cssClass }: Props) {
           revisions={revisions}
           loading={loading}
           error={error}
-          pageId={pageId}
+          pageId={resolvedPageId}
           onClose={() => setIsOpen(false)}
         />
       )}

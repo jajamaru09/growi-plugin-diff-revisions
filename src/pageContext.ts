@@ -2,11 +2,15 @@ import type { PageMode } from './types.ts';
 
 const PAGE_ID_RE = /^\/([0-9a-f]{24})$/;
 
+export function isRootPage(pathname: string): boolean {
+  return pathname === '/';
+}
+
 export function isPageIdUrl(pathname: string): boolean {
   if (pathname.startsWith('/_admin') || pathname.startsWith('/_search')) {
     return false;
   }
-  return PAGE_ID_RE.test(pathname);
+  return PAGE_ID_RE.test(pathname) || isRootPage(pathname);
 }
 
 export function extractPageId(pathname: string): string | null {
