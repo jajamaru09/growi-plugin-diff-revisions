@@ -50,6 +50,6 @@ export async function fetchAllRevisions(pageId: string): Promise<RevisionItem[]>
     revisionId: rev._id,
     createdAt: new Date(rev.createdAt),
     body: rev.body,
-    authorName: rev.author.name || rev.author.username || 'Unknown',
+    authorName: rev.author?.name || rev.author?.username || 'Unknown',
   }));
 }
