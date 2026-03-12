@@ -35,12 +35,16 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
   }, [revisions, nav.leftId, nav.rightId]);
 
   const handleJumpToFirstDiff = useCallback(() => {
-    if (!leftPanelEl) return;
-    const firstDiff = leftPanelEl.querySelector('.diff-del, .diff-ins, .diff-block-del, .diff-block-ins');
-    if (firstDiff) {
-      firstDiff.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const selector = '.diff-del, .diff-ins, .diff-block-del, .diff-block-ins';
+    const panels = [leftPanelEl, rightPanelEl].filter(Boolean) as HTMLDivElement[];
+    for (const panel of panels) {
+      const firstDiff = panel.querySelector(selector);
+      if (firstDiff) {
+        firstDiff.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
     }
-  }, [leftPanelEl]);
+  }, [leftPanelEl, rightPanelEl]);
 
   useSyncScroll({
     leftEl: leftPanelEl,
