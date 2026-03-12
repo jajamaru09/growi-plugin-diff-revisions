@@ -5,7 +5,13 @@
       "Bash(mkdir -p \"f:/Work/growi-plugin-diff-revisions/.steering\")",
       "Bash(gh api repos/jajamaru09/growi-plugin-all-seen-users/contents --jq '.[].name')",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npx tsc --noEmit)",
+      "Read(//f/Work/growi-plugin-attachment-viewer/**)",
+      "Read(//f/Work/growi-plugin-attachment-viewer/src/**)",
+      "Read(//f/Work/growi-plugin-attachment-viewer/src/components/**)",
+      "Read(//f/Work/growi-plugin-attachment-viewer/docs/**)",
+      "Read(//f/Work/growi-plugin-attachment-viewer/.steering/**)"
     ]
   }
 }

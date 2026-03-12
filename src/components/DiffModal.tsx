@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { RevisionItem } from '../types.ts';
 import { RevisionSelector } from './RevisionSelector.tsx';
@@ -25,6 +25,22 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
   const [diffMode, setDiffMode] = useState<'html' | 'markdown'>('html');
   const [leftPanelEl, setLeftPanelEl] = useState<HTMLDivElement | null>(null);
   const [rightPanelEl, setRightPanelEl] = useState<HTMLDivElement | null>(null);
+
+  // Determine if selected revisions have identical markdown
+  const noDiff = useMemo(() => {
+    const left = revisions.find((r) => r.revisionId === nav.leftId);
+    const right = revisions.find((r) => r.revisionId === nav.rightId);
+    if (!left || !right) return false;
+    return left.body === right.body;
+  }, [revisions, nav.leftId, nav.rightId]);
+
+  const handleJumpToFirstDiff = useCallback(() => {
+    if (!leftPanelEl) return;
+    const firstDiff = leftPanelEl.querySelector('.diff-del, .diff-ins, .diff-block-del, .diff-block-ins');
+    if (firstDiff) {
+      firstDiff.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [leftPanelEl]);
 
   useSyncScroll({
     leftEl: leftPanelEl,
@@ -113,6 +129,14 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
         >
           <h5 style={{ margin: 0 }}>差分比較</h5>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {noDiff && (
+              <span
+                className="badge bg-info"
+                style={{ fontSize: '14px', padding: '6px 12px' }}
+              >
+                差分なし
+              </span>
+            )}
             <div className="btn-group btn-group-sm">
               <button
                 type="button"
@@ -208,6 +232,22 @@ export function DiffModal({ revisions, loading, error, pageId, onClose }: Props)
                   />
                 </div>
               </div>
+
+              {/* Jump to first diff button */}
+              {diffMode === 'html' && (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    style={{ padding: '2px 10px', fontSize: '13px', lineHeight: 1 }}
+                    disabled={noDiff}
+                    onClick={handleJumpToFirstDiff}
+                    title="最初の差分へ移動"
+                  >
+                    ▼ 最初の差分へ
+                  </button>
+                </div>
+              )}
 
               {/* Diff content area */}
               {diffMode === 'html' ? (
