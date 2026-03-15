@@ -11,7 +11,9 @@
       "Read(//f/Work/growi-plugin-attachment-viewer/src/**)",
       "Read(//f/Work/growi-plugin-attachment-viewer/src/components/**)",
       "Read(//f/Work/growi-plugin-attachment-viewer/docs/**)",
-      "Read(//f/Work/growi-plugin-attachment-viewer/.steering/**)"
+      "Read(//f/Work/growi-plugin-attachment-viewer/.steering/**)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
     ]
   }
 }

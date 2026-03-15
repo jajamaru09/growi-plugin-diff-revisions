@@ -1,3 +1,4 @@
 node_modules/
 *.local
 .claude/settings.local.json
+.claude/settings.local.json
