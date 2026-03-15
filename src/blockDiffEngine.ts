@@ -59,6 +59,13 @@ export function extractBlocks(html: string): Block[] {
           html: node.outerHTML,
           listTag,
         });
+      } else if (tag === 'div' && node.classList.contains('callout')) {
+        // Treat callout divs as block elements
+        blocks.push({
+          type: 'callout',
+          text: (node.textContent ?? '').trim(),
+          html: node.outerHTML,
+        });
       } else {
         // Recurse into non-block wrappers (e.g. <div>, <section>)
         if (node.children.length > 0) {
